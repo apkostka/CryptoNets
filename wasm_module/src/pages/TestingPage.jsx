@@ -1005,7 +1005,7 @@ const Ready = () => {
             }}
           >
             Do Loop?
-            <label class="switch">
+            <label className="switch">
               <input
                 type="checkbox"
                 value={debugContext.functionLoop}
@@ -1013,7 +1013,7 @@ const Ready = () => {
                   debugContext.setFuctionLoop(!debugContext.functionLoop);
                 }}
               />
-              <span class="slider round"></span>
+              <span className="slider round"></span>
             </label>
           </span>
 
@@ -1236,17 +1236,16 @@ const Ready = () => {
                 }}
               >
                 Skip antispoof?:
-                <label class="switch">
+                <label className="switch">
                   <input
                     type="checkbox"
                     value={skipAntiSpoof}
-                    defaultValue={true}
                     onChange={() => {
                       setSkipAntispoof(!skipAntiSpoof);
                       console.log("skip", !skipAntiSpoof);
                     }}
                   />
-                  <span class="slider round"></span>
+                  <span className="slider round"></span>
                 </label>
               </span>
             </div>
