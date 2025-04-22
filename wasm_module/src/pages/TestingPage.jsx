@@ -1949,7 +1949,7 @@ const Ready = () => {
                   onChange={handleUploadImage3}
                   style={{ display: "none" }}
                 />
-                <span className="button">UPLOAD FACEt</span>
+                <span className="button">UPLOAD FACE</span>
               </label>
 
               <button onClick={handlePredictWithImage}>Predict Face Uploaded</button>
