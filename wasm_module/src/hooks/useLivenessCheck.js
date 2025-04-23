@@ -1,13 +1,13 @@
-import { livenessCheck } from "@privateid/cryptonets-web-sdk-alpha";
-import { useState } from "react";
+import { livenessCheck } from "@privateid/cryptonets-web-sdk-alpha"
+import { useState } from "react"
 
-let possitiveCount = 0;
-let reset = false;
+let possitiveCount = 0
+let reset = false
 const useLivenessCheck = () => {
-  const [result, setResult] = useState(null);
-  const [resultMessage, setResultMessage] = useState("");
-  const [livenessProgress, setLivenessProgress] = useState(0);
-  const [finalResult, setFinalResult] = useState("");
+  const [result, setResult] = useState(null)
+  const [resultMessage, setResultMessage] = useState("")
+  const [livenessProgress, setLivenessProgress] = useState(0)
+  const [finalResult, setFinalResult] = useState("")
 
   // RESULT_GENERIC_ERROR = -100,
   // RESULT_INVALID_FACE = -4,
@@ -17,92 +17,92 @@ const useLivenessCheck = () => {
   // RESULT_NO_SPOOF_DETECTED = 0,
   // RESULT_SPOOF_DETECTED = 1
 
-  const livenessCheckCallback = async (res) => {
-    console.log("liveness result:", res);
-    reset = false;
+  const livenessCheckCallback = async res => {
+    console.log("liveness result:", res)
+    reset = false
     while (possitiveCount <= 40 && !reset) {
-      setResult(res.returnValue.result);
+      setResult(res.returnValue.result)
       switch (res.returnValue.result) {
         case -100:
-          setResultMessage("GENERIC ERROR");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("GENERIC ERROR")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200);
-          return;
+          return
         case -4:
-          setResultMessage("INVALID FACE");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("INVALID FACE")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200);
-          return;
+          return
         case -3:
-          setResultMessage("FACE TOO CLOSE TO EDGE");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("FACE TOO CLOSE TO EDGE")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200);
-          return;
+          return
         case -2:
-          setResultMessage("MOBILE PHONE DETECTED");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("MOBILE PHONE DETECTED")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200);
-          return;
+          return
         case -1:
-          setResultMessage("NO FACE DETECTED");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("NO FACE DETECTED")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200);
-          return;
+          return
         case 0:
-          possitiveCount++;
-          setResultMessage("REAL");
-          const progress = Math.round(Math.min((possitiveCount * 100) / 40, 100));
-          setLivenessProgress(progress);
-          doLivenessCheck();
-          return;
+          possitiveCount++
+          setResultMessage("REAL")
+          const progress = Math.round(Math.min((possitiveCount * 100) / 40, 100))
+          setLivenessProgress(progress)
+          doLivenessCheck()
+          return
         case 1:
-          setResultMessage("SPOOF DETECTED");
-          setFinalResult("FAILED");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("SPOOF DETECTED")
+          setFinalResult("FAILED")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200)
-          return;
+          return
         default:
-          setResultMessage("");
-          setFinalResult("Something went wrong");
-          possitiveCount = 0;
-          reset = true;
+          setResultMessage("")
+          setFinalResult("Something went wrong")
+          possitiveCount = 0
+          reset = true
           // setTimeout(()=> {  doLivenessCheck(); }, 200)
-          return;
+          return
       }
     }
 
     if (possitiveCount >= 40) {
-      setFinalResult("Real");
+      setFinalResult("Real")
     }
 
     if (reset) {
-      possitiveCount = 0;
+      possitiveCount = 0
     }
-  };
+  }
 
   const doLivenessCheck = async () => {
-    await livenessCheck(livenessCheckCallback, { input_image_format: "rgba", antispoof_face_margin: "2" });
-  };
+    await livenessCheck(livenessCheckCallback, { input_image_format: "rgba", antispoof_face_margin: "2" })
+  }
 
   const resetAllLivenessValues = async () => {
-    possitiveCount = 0;
-    reset = false;
-    setResult(null);
-    setResultMessage("");
-    setLivenessProgress(0);
-    setFinalResult("");
-  };
+    possitiveCount = 0
+    reset = false
+    setResult(null)
+    setResultMessage("")
+    setLivenessProgress(0)
+    setFinalResult("")
+  }
 
   return {
     doLivenessCheck,
@@ -111,7 +111,7 @@ const useLivenessCheck = () => {
     livenessProgress,
     finalResult,
     resetAllLivenessValues,
-  };
-};
+  }
+}
 
-export default useLivenessCheck;
+export default useLivenessCheck

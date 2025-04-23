@@ -1,13 +1,13 @@
 /* eslint-disable */
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import {
   switchCamera,
   setStopLoopContinuousAuthentication,
   closeCamera,
   faceCompareLocal,
   documentMugshotFaceCompare,
-} from "@privateid/cryptonets-web-sdk-alpha";
-import platform, { os } from "platform";
+} from "@privateid/cryptonets-web-sdk-alpha"
+import platform, { os } from "platform"
 
 import {
   useCamera,
@@ -18,45 +18,38 @@ import {
   usePredict,
   useScanFrontDocument,
   useScanBackDocument,
-} from "../hooks";
-import {
-  CANVAS_SIZE,
-  canvasSizeOptions,
-  isBackCamera,
-  isMobile,
-  setMax2KForMobile,
-  WIDTH_TO_STANDARDS,
-} from "../utils";
+} from "../hooks"
+import { CANVAS_SIZE, canvasSizeOptions, isBackCamera, isMobile, setMax2KForMobile, WIDTH_TO_STANDARDS } from "../utils"
 
-import "./styles.css";
-import usePredictAge from "../hooks/usePredictAge";
-import useScanFrontDocumentWithoutPredict from "../hooks/useScanFrontDocument";
-import useScanFrontDocumentOCR from "../hooks/useScanFrontDocumentOCR";
-import usePrividFaceISO from "../hooks/usePrividFaceISO";
-import useFaceLogin from "../hooks/useFaceLogin";
-import useScanHealthcareCard from "../hooks/useScanHealthcareCard";
+import "./styles.css"
+import usePredictAge from "../hooks/usePredictAge"
+import useScanFrontDocumentWithoutPredict from "../hooks/useScanFrontDocument"
+import useScanFrontDocumentOCR from "../hooks/useScanFrontDocumentOCR"
+import usePrividFaceISO from "../hooks/usePrividFaceISO"
+import useFaceLogin from "../hooks/useFaceLogin"
+import useScanHealthcareCard from "../hooks/useScanHealthcareCard"
 import {
   getEnrollFaceMessage,
   getFaceValidationMessage,
   getFrontDocumentStatusMessage,
   getRawFaceValidationStatus,
-} from "@privateid/cryptonets-web-sdk-alpha/dist/utils";
-import { DebugContext } from "../context/DebugContext";
-import useContinuousPredictWithoutRestrictions from "../hooks/useContinuousPredictWithoutRestriction";
-import useMultiFramePredictAge from "../hooks/useMultiFramePredictAge";
-import useOscarLogin from "../hooks/useOscarLogin";
-import { useParams } from "react-router-dom";
-import useEnrollWithAge from "../hooks/useEnrollWithAge";
-import useTwoStepFaceLogin from "../hooks/useTwoStepFaceLogin";
-import useMultiframeTwoStepFaceLogin from "../hooks/useMultiframeTwoStepFaceLogin";
-import useMultiframePredict from "../hooks/useMultiframePredict";
+} from "@privateid/cryptonets-web-sdk-alpha/dist/utils"
+import { DebugContext } from "../context/DebugContext"
+import useContinuousPredictWithoutRestrictions from "../hooks/useContinuousPredictWithoutRestriction"
+import useMultiFramePredictAge from "../hooks/useMultiFramePredictAge"
+import useOscarLogin from "../hooks/useOscarLogin"
+import { useParams } from "react-router-dom"
+import useEnrollWithAge from "../hooks/useEnrollWithAge"
+import useTwoStepFaceLogin from "../hooks/useTwoStepFaceLogin"
+import useMultiframeTwoStepFaceLogin from "../hooks/useMultiframeTwoStepFaceLogin"
+import useMultiframePredict from "../hooks/useMultiframePredict"
 
-let callingWasm = false;
+let callingWasm = false
 const Ready = () => {
-  const debugContext = useContext(DebugContext);
-  let { loadSimd } = useParams();
-  console.log(loadSimd);
-  const { ready: wasmReady, deviceSupported, init: initWasm } = useWasm();
+  const debugContext = useContext(DebugContext)
+  let { loadSimd } = useParams()
+  console.log(loadSimd)
+  const { ready: wasmReady, deviceSupported, init: initWasm } = useWasm()
 
   const [cameraSettingsList, setCameraSettingsList] = useState({
     focusDistance: false,
@@ -65,31 +58,31 @@ const Ready = () => {
     brightness: false,
     saturation: false,
     contrast: false,
-  });
+  })
 
-  const [cameraFocusMin, setCameraFocusMin] = useState(0);
-  const [cameraFocusMax, setCameraFocusMax] = useState(0);
-  const [cameraFocusCurrent, setCameraFocusCurrent] = useState(0);
+  const [cameraFocusMin, setCameraFocusMin] = useState(0)
+  const [cameraFocusMax, setCameraFocusMax] = useState(0)
+  const [cameraFocusCurrent, setCameraFocusCurrent] = useState(0)
 
-  const [cameraExposureTimeMin, setCameraExposureTimeMin] = useState(0);
-  const [cameraExposureTimeMax, setCameraExposureTimeMax] = useState(0);
-  const [cameraExposureTimeCurrent, setCameraExposureTimeCurrent] = useState(0);
+  const [cameraExposureTimeMin, setCameraExposureTimeMin] = useState(0)
+  const [cameraExposureTimeMax, setCameraExposureTimeMax] = useState(0)
+  const [cameraExposureTimeCurrent, setCameraExposureTimeCurrent] = useState(0)
 
-  const [cameraSharpnessMin, setCameraSharpnessMin] = useState(0);
-  const [cameraSharpnessMax, setCameraSharpnessMax] = useState(0);
-  const [cameraSharpnessCurrent, setCameraSharpnessCurrent] = useState(0);
+  const [cameraSharpnessMin, setCameraSharpnessMin] = useState(0)
+  const [cameraSharpnessMax, setCameraSharpnessMax] = useState(0)
+  const [cameraSharpnessCurrent, setCameraSharpnessCurrent] = useState(0)
 
-  const [cameraBrightnessMin, setCameraBrightnessMin] = useState(0);
-  const [cameraBrightnessMax, setCameraBrightnessMax] = useState(0);
-  const [cameraBrightnessCurrent, setCameraBrightnessCurrent] = useState(0);
+  const [cameraBrightnessMin, setCameraBrightnessMin] = useState(0)
+  const [cameraBrightnessMax, setCameraBrightnessMax] = useState(0)
+  const [cameraBrightnessCurrent, setCameraBrightnessCurrent] = useState(0)
 
-  const [cameraSaturationMin, setCameraSaturationMin] = useState(0);
-  const [cameraSaturationMax, setCameraSaturationMax] = useState(0);
-  const [cameraSaturationCurrent, setCameraSaturationCurrent] = useState(0);
+  const [cameraSaturationMin, setCameraSaturationMin] = useState(0)
+  const [cameraSaturationMax, setCameraSaturationMax] = useState(0)
+  const [cameraSaturationCurrent, setCameraSaturationCurrent] = useState(0)
 
-  const [cameraContrastMin, setCameraContrastMin] = useState(0);
-  const [cameraContrastMax, setCameraContrastMax] = useState(0);
-  const [cameraContrastCurrent, setCameraContrastCurrent] = useState(0);
+  const [cameraContrastMin, setCameraContrastMin] = useState(0)
+  const [cameraContrastMax, setCameraContrastMax] = useState(0)
+  const [cameraContrastCurrent, setCameraContrastCurrent] = useState(0)
 
   const {
     ready: cameraReady,
@@ -120,107 +113,107 @@ const Ready = () => {
     setCameraContrastMin,
     setCameraContrastMax,
     setCameraContrastCurrent,
-    setCameraSettingsList
-  );
+    setCameraSettingsList,
+  )
 
-  const [disableButtons, setDisableButtons] = useState(false);
+  const [disableButtons, setDisableButtons] = useState(false)
 
   function getUrlParameter(sParam, defaultValue = undefined) {
-    const sPageURL = window.location.search.substring(1);
-    const sURLVariables = sPageURL.split("&");
-    let sParameterName;
-    let i;
+    const sPageURL = window.location.search.substring(1)
+    const sURLVariables = sPageURL.split("&")
+    let sParameterName
+    let i
 
     for (i = 0; i < sURLVariables.length; i++) {
-      sParameterName = sURLVariables[i].split("=");
+      sParameterName = sURLVariables[i].split("=")
 
       if (sParameterName[0] === sParam) {
-        return typeof sParameterName[1] === undefined ? defaultValue : decodeURIComponent(sParameterName[1]);
+        return typeof sParameterName[1] === undefined ? defaultValue : decodeURIComponent(sParameterName[1])
       }
     }
-    return defaultValue;
+    return defaultValue
   }
   useEffect(() => {
-    const debug_type = getUrlParameter("debug_type", null);
+    const debug_type = getUrlParameter("debug_type", null)
     if (debug_type) {
-      debugContext.setShowDebugOptions(true);
+      debugContext.setShowDebugOptions(true)
     }
-  }, []);
+  }, [])
 
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false)
 
-  const [deviceCapabilities, setDeviceCapabilities] = useState(capabilities);
+  const [deviceCapabilities, setDeviceCapabilities] = useState(capabilities)
   const canvasSizeList = useMemo(() => {
-    let canvasList = [...canvasSizeOptions];
-    const maxHeight = deviceCapabilities?.height?.max || capabilities?.height?.max;
-    let label = WIDTH_TO_STANDARDS[setMax2KForMobile(deviceCapabilities?.width?.max || capabilities?.width?.max)];
-    const sliceIndex = canvasList.findIndex((option) => option.value === label);
-    const slicedArr = canvasList.slice(sliceIndex);
+    let canvasList = [...canvasSizeOptions]
+    const maxHeight = deviceCapabilities?.height?.max || capabilities?.height?.max
+    let label = WIDTH_TO_STANDARDS[setMax2KForMobile(deviceCapabilities?.width?.max || capabilities?.width?.max)]
+    const sliceIndex = canvasList.findIndex(option => option.value === label)
+    const slicedArr = canvasList.slice(sliceIndex)
     if (label === "FHD" && maxHeight === 1440) {
-      return [{ label: "iPhoneCC", value: "iPhoneCC" }, ...slicedArr];
+      return [{ label: "iPhoneCC", value: "iPhoneCC" }, ...slicedArr]
     }
-    return slicedArr;
-  }, [capabilities, deviceCapabilities]);
-  const initialCanvasSize = WIDTH_TO_STANDARDS[settings?.width];
-  const isBack = isBackCamera(devices, device);
-  const [deviceId, setDeviceId] = useState(device);
-  const [devicesList] = useState(devices);
+    return slicedArr
+  }, [capabilities, deviceCapabilities])
+  const initialCanvasSize = WIDTH_TO_STANDARDS[settings?.width]
+  const isBack = isBackCamera(devices, device)
+  const [deviceId, setDeviceId] = useState(device)
+  const [devicesList] = useState(devices)
 
-  const [canvasSize, setCanvasSize] = useState();
+  const [canvasSize, setCanvasSize] = useState()
 
   // Use Continuous Predict
-  const predictRetryTimes = 1;
-  const [continuousPredictUUID, setContinuousPredictUUID] = useState(null);
-  const [continuousPredictGUID, setContinuousPredictGUID] = useState(null);
+  const predictRetryTimes = 1
+  const [continuousPredictUUID, setContinuousPredictUUID] = useState(null)
+  const [continuousPredictGUID, setContinuousPredictGUID] = useState(null)
   const continuousPredictSuccess = (UUID, GUID) => {
-    setContinuousPredictUUID(UUID);
-    setContinuousPredictGUID(GUID);
-  };
+    setContinuousPredictUUID(UUID)
+    setContinuousPredictGUID(GUID)
+  }
   const continuousOnNotFoundAndFailure = () => {
-    setContinuousPredictUUID(null);
-    setContinuousPredictGUID(null);
-  };
+    setContinuousPredictUUID(null)
+    setContinuousPredictGUID(null)
+  }
 
-  const [currentAction, setCurrentAction] = useState(null);
-  const [skipAntiSpoof, setSkipAntispoof] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null)
+  const [skipAntiSpoof, setSkipAntispoof] = useState(false)
 
   useEffect(() => {
-    console.log("useEffect starting wasm and camera");
-    console.log("--- wasm status ", wasmReady, cameraReady);
+    console.log("useEffect starting wasm and camera")
+    console.log("--- wasm status ", wasmReady, cameraReady)
     if (wasmReady && cameraReady) {
-      return;
+      return
     }
     if (!wasmReady) {
       if (!callingWasm) {
         // NOTE: MAKE SURE THAT WASM IS ONLY LOADED ONCE
-        initWasm(loadSimd);
-        callingWasm = true;
+        initWasm(loadSimd)
+        callingWasm = true
       }
-      return;
+      return
     }
     if (!cameraReady) {
-      initCamera();
+      initCamera()
     }
-  }, [wasmReady, cameraReady]);
+  }, [wasmReady, cameraReady])
 
   const {
     isValidCall,
     antispoofPerformed: isValidAntispoofPerformed,
     antispoofStatus: isValidAntispoofStatus,
     isValidStatus: isValidStatus,
-  } = useIsValid("userVideo");
+  } = useIsValid("userVideo")
   // isValid
   const handleIsValid = async () => {
-    setShowSuccess(false);
-    setCurrentAction("isValid");
-    await isValidCall(skipAntiSpoof);
-  };
+    setShowSuccess(false)
+    setCurrentAction("isValid")
+    await isValidCall(skipAntiSpoof)
+  }
 
   // Enroll ONEFA
   const useEnrollSuccess = () => {
-    console.log("=======ENROLL SUCCESS=======");
-    setShowSuccess(true);
-  };
+    console.log("=======ENROLL SUCCESS=======")
+    setShowSuccess(true)
+  }
   const {
     enrollGUID,
     enrollPUID,
@@ -231,22 +224,22 @@ const Ready = () => {
     enrollUserOneFa,
     enrollImageData,
     changeThresholdEnroll,
-  } = useEnroll({ onSuccess: useEnrollSuccess, disableButtons: setDisableButtons });
+  } = useEnroll({ onSuccess: useEnrollSuccess, disableButtons: setDisableButtons })
   const handleEnrollOneFa = async () => {
-    setShowSuccess(false);
-    setCurrentAction("useEnrollOneFa");
-    enrollUserOneFa("", skipAntiSpoof);
-  };
+    setShowSuccess(false)
+    setCurrentAction("useEnrollOneFa")
+    enrollUserOneFa("", skipAntiSpoof)
+  }
 
-  const handleEnrollUrl = async (url) => {
-    setShowSuccess(false);
-    setCurrentAction("useEnrollOneFa");
-    enrollUserOneFa("", skipAntiSpoof, url, "test");
-  };
+  const handleEnrollUrl = async url => {
+    setShowSuccess(false)
+    setCurrentAction("useEnrollOneFa")
+    enrollUserOneFa("", skipAntiSpoof, url, "test")
+  }
 
   const handlePredictSuccess = () => {
-    console.log("======PREDICT SUCCESS========");
-  };
+    console.log("======PREDICT SUCCESS========")
+  }
   const {
     predictAntispoofPerformed,
     predictAntispoofStatus,
@@ -255,34 +248,34 @@ const Ready = () => {
     predictValidationStatus,
     predictMessage,
     predictUserOneFa,
-  } = usePredict({ onSuccess: handlePredictSuccess, disableButtons: setDisableButtons });
+  } = usePredict({ onSuccess: handlePredictSuccess, disableButtons: setDisableButtons })
   const handlePredictOneFa = async () => {
-    console.log("PREDICTING");
-    setShowSuccess(false);
-    setCurrentAction("usePredictOneFa");
-    predictUserOneFa(skipAntiSpoof);
-  };
+    console.log("PREDICTING")
+    setShowSuccess(false)
+    setCurrentAction("usePredictOneFa")
+    predictUserOneFa(skipAntiSpoof)
+  }
 
-  const handlePredictUrl = async (url) => {
-    console.log("PREDICTING");
-    setShowSuccess(false);
-    setCurrentAction("usePredictWithUrl");
-    predictUserOneFa(skipAntiSpoof, url, "test");
-  };
+  const handlePredictUrl = async url => {
+    console.log("PREDICTING")
+    setShowSuccess(false)
+    setCurrentAction("usePredictWithUrl")
+    predictUserOneFa(skipAntiSpoof, url, "test")
+  }
 
-  const handleSwitchCamera = async (e) => {
-    setDeviceId(e.target.value);
-    const { capabilities = {}, settings = {}, devices } = await switchCamera(null, e.target.value);
-    setDeviceCapabilities(capabilities);
+  const handleSwitchCamera = async e => {
+    setDeviceId(e.target.value)
+    const { capabilities = {}, settings = {}, devices } = await switchCamera(null, e.target.value)
+    setDeviceCapabilities(capabilities)
     // setDevicesList(devices.map(mapDevices));
-    console.log("switch camera capabilities:", capabilities);
-    console.log("switch camera settings:", settings);
+    console.log("switch camera capabilities:", capabilities)
+    console.log("switch camera settings:", settings)
     if (currentAction === "useScanDocumentFront") {
-      let width = WIDTH_TO_STANDARDS[settings?.width];
+      let width = WIDTH_TO_STANDARDS[settings?.width]
       if (width === "FHD" && settings?.height === 1440) {
-        width = "iPhoneCC";
+        width = "iPhoneCC"
       }
-      await handleCanvasSize({ target: { value: width } }, true);
+      await handleCanvasSize({ target: { value: width } }, true)
     }
 
     try {
@@ -294,73 +287,73 @@ const Ready = () => {
           brightness: false,
           saturation: false,
           contrast: false,
-        };
+        }
         if (capabilities.focusDistance) {
-          setCameraFocusMin(capabilities.focusDistance.min);
-          setCameraFocusMax(capabilities.focusDistance.max);
-          setCameraFocusCurrent(settings.focusDistance);
-          cameraSettings = { ...settings, focusDistance: true };
+          setCameraFocusMin(capabilities.focusDistance.min)
+          setCameraFocusMax(capabilities.focusDistance.max)
+          setCameraFocusCurrent(settings.focusDistance)
+          cameraSettings = { ...settings, focusDistance: true }
         }
         if (capabilities.exposureTime) {
-          setCameraExposureTimeMin(Math.ceil(capabilities.exposureTime.min));
-          setCameraExposureTimeMax(Math.ceil(capabilities.exposureTime.max));
-          setCameraExposureTimeCurrent(Math.ceil(settings.exposureTime));
-          cameraSettings = { ...settings, exposureTime: true };
+          setCameraExposureTimeMin(Math.ceil(capabilities.exposureTime.min))
+          setCameraExposureTimeMax(Math.ceil(capabilities.exposureTime.max))
+          setCameraExposureTimeCurrent(Math.ceil(settings.exposureTime))
+          cameraSettings = { ...settings, exposureTime: true }
         }
         if (capabilities.sharpness) {
-          setCameraSharpnessMin(Math.ceil(capabilities.sharpness.min));
-          setCameraSharpnessMax(Math.ceil(capabilities.sharpness.max));
-          setCameraSharpnessCurrent(Math.ceil(settings.sharpness));
-          cameraSettings = { ...settings, sharpness: true };
+          setCameraSharpnessMin(Math.ceil(capabilities.sharpness.min))
+          setCameraSharpnessMax(Math.ceil(capabilities.sharpness.max))
+          setCameraSharpnessCurrent(Math.ceil(settings.sharpness))
+          cameraSettings = { ...settings, sharpness: true }
         }
         if (capabilities.brightness) {
-          setCameraBrightnessMin(Math.ceil(capabilities.brightness.min));
-          setCameraBrightnessMax(Math.ceil(capabilities.brightness.max));
-          setCameraBrightnessCurrent(Math.ceil(settings.brightness));
-          cameraSettings = { ...settings, brightness: true };
+          setCameraBrightnessMin(Math.ceil(capabilities.brightness.min))
+          setCameraBrightnessMax(Math.ceil(capabilities.brightness.max))
+          setCameraBrightnessCurrent(Math.ceil(settings.brightness))
+          cameraSettings = { ...settings, brightness: true }
         }
         if (capabilities.saturation) {
-          setCameraSaturationMin(Math.ceil(capabilities.saturation.min));
-          setCameraSaturationMax(Math.ceil(capabilities.saturation.max));
-          setCameraSaturationCurrent(Math.ceil(settings.saturation));
-          cameraSettings = { ...settings, saturation: true };
+          setCameraSaturationMin(Math.ceil(capabilities.saturation.min))
+          setCameraSaturationMax(Math.ceil(capabilities.saturation.max))
+          setCameraSaturationCurrent(Math.ceil(settings.saturation))
+          cameraSettings = { ...settings, saturation: true }
         }
         if (capabilities.contrast) {
-          setCameraContrastMin(Math.ceil(capabilities.contrast.min));
-          setCameraContrastMax(Math.ceil(capabilities.contrast.max));
-          setCameraContrastCurrent(Math.ceil(settings.contrast));
-          cameraSettings = { ...settings, contrast: true };
+          setCameraContrastMin(Math.ceil(capabilities.contrast.min))
+          setCameraContrastMax(Math.ceil(capabilities.contrast.max))
+          setCameraContrastCurrent(Math.ceil(settings.contrast))
+          cameraSettings = { ...settings, contrast: true }
         }
-        setCameraSettingsList(cameraSettings);
+        setCameraSettingsList(cameraSettings)
       }
     } catch (e) {
       //
     }
-  };
+  }
 
   // Use Delete
   // for useDelete, first we need to get the UUID of the user by doing a predict
-  const [deletionStatus, setDeletionStatus] = useState(null);
-  const useDeleteCallback = (deleteStatus) => {
-    setDeletionStatus(deleteStatus);
-  };
-  const { loading, onDeleteUser } = useDelete(useDeleteCallback, wasmReady);
+  const [deletionStatus, setDeletionStatus] = useState(null)
+  const useDeleteCallback = deleteStatus => {
+    setDeletionStatus(deleteStatus)
+  }
+  const { loading, onDeleteUser } = useDelete(useDeleteCallback, wasmReady)
 
   const handleDelete = async () => {
-    setShowSuccess(false);
-    setDeletionStatus(null);
-    setCurrentAction("useDelete");
-    predictUserOneFa();
-  };
+    setShowSuccess(false)
+    setDeletionStatus(null)
+    setCurrentAction("useDelete")
+    predictUserOneFa()
+  }
 
   // deleting
   useEffect(() => {
     if (currentAction === "useDelete") {
       if (predictPUID) {
-        onDeleteUser(predictPUID);
+        onDeleteUser(predictPUID)
       }
     }
-  }, [currentAction, predictPUID]);
+  }, [currentAction, predictPUID])
 
   // Scan Document Back
   const {
@@ -370,14 +363,14 @@ const Ready = () => {
     croppedBarcodeImage: croppedBarcodeBase64,
     croppedDocumentImage: croppedBackDocumentBase64,
     clearStatusBackScan,
-  } = useScanBackDocument(setShowSuccess);
+  } = useScanBackDocument(setShowSuccess)
 
   const handleScanDocumentBack = async () => {
     // setShowSuccess(false);
-    clearStatusBackScan();
-    setCurrentAction("useScanDocumentBack");
-    await scanBackDocument();
-  };
+    clearStatusBackScan()
+    setCurrentAction("useScanDocumentBack")
+    await scanBackDocument()
+  }
 
   // const isDocumentOrBackCamera =
   //   ["useScanDocumentBack", "useScanDocumentFront", "useScanDocumentFrontValidity"].includes(currentAction) || isBack;
@@ -401,13 +394,13 @@ const Ready = () => {
     antispoofPerformed: predictAgeAntispoofPerformed,
     antispoofStatus: predictAgeAntispoofStatus,
     validationStatus: predictAgeValidationStatus,
-  } = useMultiFramePredictAge();
+  } = useMultiFramePredictAge()
 
   const handlePredictAge = async () => {
-    setShowSuccess(false);
-    setCurrentAction("usePredictAge");
-    await doPredictAge(skipAntiSpoof);
-  };
+    setShowSuccess(false)
+    setCurrentAction("usePredictAge")
+    await doPredictAge(skipAntiSpoof)
+  }
 
   // to start and stop predictAge call when on loop
   useEffect(() => {
@@ -427,7 +420,7 @@ const Ready = () => {
     // } else {
     //   setPredictAgeHasFinished(false);
     // }
-  }, [currentAction, predictAgeHasFinished, debugContext.functionLoop]);
+  }, [currentAction, predictAgeHasFinished, debugContext.functionLoop])
 
   // Scan Front DL without predict
 
@@ -441,18 +434,18 @@ const Ready = () => {
     predictMugshotImage,
     predictMugshotImageData,
     frontScanData,
-  } = useScanFrontDocumentWithoutPredict(setShowSuccess);
+  } = useScanFrontDocumentWithoutPredict(setShowSuccess)
   const handleFrontDLValidity = async () => {
-    setCurrentAction("useScanDocumentFrontValidity");
-    await scanFrontValidity(debugContext.functionLoop);
-  };
+    setCurrentAction("useScanDocumentFrontValidity")
+    await scanFrontValidity(debugContext.functionLoop)
+  }
 
-  const { isFound: isfoundOCR, scanFrontDocument: scanFrontOCR, ageOCR } = useScanFrontDocumentOCR(setShowSuccess);
+  const { isFound: isfoundOCR, scanFrontDocument: scanFrontOCR, ageOCR } = useScanFrontDocumentOCR(setShowSuccess)
 
   const handleFrontDLOCR = async () => {
-    setCurrentAction("useScanDocumentFrontOCR");
-    await scanFrontOCR(debugContext.functionLoop);
-  };
+    setCurrentAction("useScanDocumentFrontOCR")
+    await scanFrontOCR(debugContext.functionLoop)
+  }
 
   // const handleCanvasSize = async (e, skipSwitchCamera = false) => {
   //   if (currentAction === "useScanFrontValidity" || currentAction === "useScanDocumentBack") {
@@ -477,129 +470,129 @@ const Ready = () => {
   //   }
   // };
 
-  const { doFaceISO, inputImage, faceISOImageData, faceISOStatus, faceISOError } = usePrividFaceISO();
+  const { doFaceISO, inputImage, faceISOImageData, faceISOStatus, faceISOError } = usePrividFaceISO()
 
   const handlePrividFaceISO = () => {
-    setCurrentAction("privid_face_iso");
-    doFaceISO(debugContext.functionLoop);
-  };
+    setCurrentAction("privid_face_iso")
+    doFaceISO(debugContext.functionLoop)
+  }
 
   const handleReopenCamera = async () => {
-    setReady(false);
-    await closeCamera();
-    await init();
-  };
+    setReady(false)
+    await closeCamera()
+    await init()
+  }
 
   const handleCloseCamera = async () => {
-    await closeCamera();
-  };
+    await closeCamera()
+  }
 
-  const [uploadImage1, setUploadImage1] = useState(null);
-  const [uploadImage2, setUploadImage2] = useState(null);
+  const [uploadImage1, setUploadImage1] = useState(null)
+  const [uploadImage2, setUploadImage2] = useState(null)
 
-  const handleUploadImage1 = async (e) => {
-    console.log("clicked");
-    console.log(e.target.files);
-    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg/;
+  const handleUploadImage1 = async e => {
+    console.log("clicked")
+    console.log(e.target.files)
+    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg/
     if (e.target.files.length > 0) {
       if (imageRegex.test(e.target.files[0].type)) {
-        const imageUrl = URL.createObjectURL(e.target.files[0]);
-        console.log(e.target.files[0]);
+        const imageUrl = URL.createObjectURL(e.target.files[0])
+        console.log(e.target.files[0])
 
-        const getBase64 = (file) => {
+        const getBase64 = file => {
           return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
+            var reader = new FileReader()
+            reader.readAsDataURL(file)
 
             reader.onload = function () {
-              resolve(reader.result);
-            };
+              resolve(reader.result)
+            }
             reader.onerror = function (error) {
-              reject(error);
-            };
-          });
-        };
+              reject(error)
+            }
+          })
+        }
 
-        const base64 = await getBase64(e.target.files[0]); // prints the base64 string
-        var newImg = new Image();
-        newImg.src = base64;
+        const base64 = await getBase64(e.target.files[0]) // prints the base64 string
+        var newImg = new Image()
+        newImg.src = base64
         newImg.onload = async () => {
           var imgSize = {
             w: newImg.width,
             h: newImg.height,
-          };
-          alert(imgSize.w + " " + imgSize.h);
-          const canvas = document.createElement("canvas");
-          canvas.setAttribute("height", `${imgSize.h}`);
-          canvas.setAttribute("width", `${imgSize.w}`);
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(newImg, 0, 0);
+          }
+          alert(imgSize.w + " " + imgSize.h)
+          const canvas = document.createElement("canvas")
+          canvas.setAttribute("height", `${imgSize.h}`)
+          canvas.setAttribute("width", `${imgSize.w}`)
+          var ctx = canvas.getContext("2d")
+          ctx.drawImage(newImg, 0, 0)
 
-          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h);
-          console.log("imageData", imageData);
-          setUploadImage1(imageData);
-        };
+          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h)
+          console.log("imageData", imageData)
+          setUploadImage1(imageData)
+        }
       } else {
-        console.log("INVALID IMAGE TYPE");
+        console.log("INVALID IMAGE TYPE")
       }
     }
-  };
-  const handleUploadImage2 = async (e) => {
-    console.log(e.target.files);
-    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/;
+  }
+  const handleUploadImage2 = async e => {
+    console.log(e.target.files)
+    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/
     if (e.target.files.length > 0) {
       if (imageRegex.test(e.target.files[0].type)) {
-        const imageUrl = URL.createObjectURL(e.target.files[0]);
+        const imageUrl = URL.createObjectURL(e.target.files[0])
 
-        console.log(e.target.files[0]);
+        console.log(e.target.files[0])
 
-        const getBase64 = (file) => {
+        const getBase64 = file => {
           return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
+            var reader = new FileReader()
+            reader.readAsDataURL(file)
 
             reader.onload = function () {
-              resolve(reader.result);
-            };
+              resolve(reader.result)
+            }
             reader.onerror = function (error) {
-              reject(error);
-            };
-          });
-        };
+              reject(error)
+            }
+          })
+        }
 
-        const base64 = await getBase64(e.target.files[0]); // prints the base64 string
-        console.log("====> GIF TEST: ", { base64 });
-        var newImg = new Image();
-        newImg.src = base64;
+        const base64 = await getBase64(e.target.files[0]) // prints the base64 string
+        console.log("====> GIF TEST: ", { base64 })
+        var newImg = new Image()
+        newImg.src = base64
         newImg.onload = async () => {
           var imgSize = {
             w: newImg.width,
             h: newImg.height,
-          };
-          alert(imgSize.w + " " + imgSize.h);
-          const canvas = document.createElement("canvas");
-          canvas.setAttribute("height", `${imgSize.h}`);
-          canvas.setAttribute("width", `${imgSize.w}`);
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(newImg, 0, 0);
+          }
+          alert(imgSize.w + " " + imgSize.h)
+          const canvas = document.createElement("canvas")
+          canvas.setAttribute("height", `${imgSize.h}`)
+          canvas.setAttribute("width", `${imgSize.w}`)
+          var ctx = canvas.getContext("2d")
+          ctx.drawImage(newImg, 0, 0)
 
-          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h);
-          console.log("imageData", imageData);
-          setUploadImage2(imageData);
-        };
+          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h)
+          console.log("imageData", imageData)
+          setUploadImage2(imageData)
+        }
       } else {
-        console.log("INVALID IMAGE TYPE");
+        console.log("INVALID IMAGE TYPE")
       }
     }
-  };
+  }
 
   const handleDoCompare = async () => {
-    const callback = (result) => {
-      console.log("COMPARE RESULT", result);
-    };
+    const callback = result => {
+      console.log("COMPARE RESULT", result)
+    }
 
-    await documentMugshotFaceCompare(callback, uploadImage1, uploadImage2);
-  };
+    await documentMugshotFaceCompare(callback, uploadImage1, uploadImage2)
+  }
 
   // Face Login
   const {
@@ -610,13 +603,13 @@ const Ready = () => {
     faceLoginMessage,
     faceLoginPUID,
     faceLoginValidationStatus,
-  } = useFaceLogin("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons);
+  } = useFaceLogin("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleFaceLogin = async () => {
-    setShowSuccess(false);
-    setCurrentAction("useFaceLogin");
-    doFaceLogin(skipAntiSpoof);
-  };
+    setShowSuccess(false)
+    setCurrentAction("useFaceLogin")
+    doFaceLogin(skipAntiSpoof)
+  }
 
   // Face Login
   const {
@@ -627,26 +620,26 @@ const Ready = () => {
     oscarLoginMessage,
     oscarLoginPUID,
     oscarLoginValidationStatus,
-  } = useOscarLogin("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons);
+  } = useOscarLogin("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleOscarLogin = async () => {
-    setShowSuccess(false);
-    setCurrentAction("useOscarLogin");
-    doOscarLogin(skipAntiSpoof);
-  };
+    setShowSuccess(false)
+    setCurrentAction("useOscarLogin")
+    doOscarLogin(skipAntiSpoof)
+  }
 
   // Scan Healthcare Card
-  const { croppedDocumentBase64, doScanHealthcareCard } = useScanHealthcareCard(setShowSuccess);
+  const { croppedDocumentBase64, doScanHealthcareCard } = useScanHealthcareCard(setShowSuccess)
 
   const handleUseScanHealhcareCard = async () => {
-    setShowSuccess(false);
-    setCurrentAction("useScanHealthcareCard");
-    doScanHealthcareCard(undefined, debugContext.functionLoop);
-  };
+    setShowSuccess(false)
+    setCurrentAction("useScanHealthcareCard")
+    doScanHealthcareCard(undefined, debugContext.functionLoop)
+  }
 
-  const handleCopyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-  };
+  const handleCopyToClipboard = text => {
+    navigator.clipboard.writeText(text)
+  }
 
   // const handleLivenessCheck = async () => {
   //   setCurrentAction("livenessCheck");
@@ -660,19 +653,19 @@ const Ready = () => {
     continuousPredictWithoutRestrictionsPUID,
     continuousPredictWithoutRestrictionsValidationStatus,
     doContinuousPredictWithoutRestrictions,
-  } = useContinuousPredictWithoutRestrictions(setShowSuccess);
+  } = useContinuousPredictWithoutRestrictions(setShowSuccess)
 
   const handleBurningMan = () => {
-    setCurrentAction("useContinuousPredictWithoutRestrictions");
-    doContinuousPredictWithoutRestrictions();
-  };
+    setCurrentAction("useContinuousPredictWithoutRestrictions")
+    doContinuousPredictWithoutRestrictions()
+  }
 
-  const handleFocusChange = async (val) => {
+  const handleFocusChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
 
       await track.applyConstraints({
         advanced: [
@@ -681,22 +674,22 @@ const Ready = () => {
             focusDistance: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
 
-      console.log("new Settings", newSettings);
+      console.log("new Settings", newSettings)
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
-  const handleExposureTimeChange = async (val) => {
+  const handleExposureTimeChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
       await track.applyConstraints({
         advanced: [
           {
@@ -704,84 +697,84 @@ const Ready = () => {
             exposureTime: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
-  const handleSharpnessChange = async (val) => {
+  const handleSharpnessChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
       await track.applyConstraints({
         advanced: [
           {
             sharpness: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
 
-      console.log("new Settings", newSettings);
+      console.log("new Settings", newSettings)
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
-  const handleBrightnessChange = async (val) => {
+  const handleBrightnessChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
       await track.applyConstraints({
         advanced: [
           {
             brightness: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
-  const handleSaturationChange = async (val) => {
+  const handleSaturationChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
       await track.applyConstraints({
         advanced: [
           {
             saturation: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
 
-      console.log("new Settings", newSettings);
+      console.log("new Settings", newSettings)
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
-  const handleContrastChange = async (val) => {
+  const handleContrastChange = async val => {
     try {
-      const video = document.getElementById("userVideo");
-      const mediaStream = video.srcObject;
-      const track = await mediaStream.getTracks()[0];
-      const capabilities = track.getCapabilities();
+      const video = document.getElementById("userVideo")
+      const mediaStream = video.srcObject
+      const track = await mediaStream.getTracks()[0]
+      const capabilities = track.getCapabilities()
 
       await track.applyConstraints({
         advanced: [
@@ -789,15 +782,15 @@ const Ready = () => {
             contrast: val,
           },
         ],
-      });
-      const newSettings = await track.getSettings();
+      })
+      const newSettings = await track.getSettings()
 
-      console.log("new Settings", newSettings);
+      console.log("new Settings", newSettings)
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
   // Enroll With Age
   const {
@@ -809,125 +802,125 @@ const Ready = () => {
     ewaToken,
     ewaValidationStatus,
     enrollWithAge,
-  } = useEnrollWithAge("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons);
+  } = useEnrollWithAge("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleEnrollWithAge = async () => {
-    setCurrentAction("enrollWithAge");
-    await enrollWithAge("");
-  };
+    setCurrentAction("enrollWithAge")
+    await enrollWithAge("")
+  }
 
-  const [uploadImage3, setUploadImage3] = useState(null);
-  const handleUploadImage3 = async (e) => {
-    console.log(e.target.files);
-    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/;
+  const [uploadImage3, setUploadImage3] = useState(null)
+  const handleUploadImage3 = async e => {
+    console.log(e.target.files)
+    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/
     if (e.target.files.length > 0) {
       if (imageRegex.test(e.target.files[0].type)) {
-        const imageUrl = URL.createObjectURL(e.target.files[0]);
+        const imageUrl = URL.createObjectURL(e.target.files[0])
 
-        console.log(e.target.files[0]);
+        console.log(e.target.files[0])
 
-        const getBase64 = (file) => {
+        const getBase64 = file => {
           return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
+            var reader = new FileReader()
+            reader.readAsDataURL(file)
 
             reader.onload = function () {
-              resolve(reader.result);
-            };
+              resolve(reader.result)
+            }
             reader.onerror = function (error) {
-              reject(error);
-            };
-          });
-        };
+              reject(error)
+            }
+          })
+        }
 
-        const base64 = await getBase64(e.target.files[0]); // prints the base64 string
-        console.log("====> GIF TEST: ", { base64 });
-        var newImg = new Image();
-        newImg.src = base64;
+        const base64 = await getBase64(e.target.files[0]) // prints the base64 string
+        console.log("====> GIF TEST: ", { base64 })
+        var newImg = new Image()
+        newImg.src = base64
         newImg.onload = async () => {
           var imgSize = {
             w: newImg.width,
             h: newImg.height,
-          };
-          alert(imgSize.w + " " + imgSize.h);
-          const canvas = document.createElement("canvas");
-          canvas.setAttribute("height", `${imgSize.h}`);
-          canvas.setAttribute("width", `${imgSize.w}`);
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(newImg, 0, 0);
+          }
+          alert(imgSize.w + " " + imgSize.h)
+          const canvas = document.createElement("canvas")
+          canvas.setAttribute("height", `${imgSize.h}`)
+          canvas.setAttribute("width", `${imgSize.w}`)
+          var ctx = canvas.getContext("2d")
+          ctx.drawImage(newImg, 0, 0)
 
-          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h);
-          console.log("imageData", imageData);
-          setUploadImage3(imageData);
-        };
+          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h)
+          console.log("imageData", imageData)
+          setUploadImage3(imageData)
+        }
       } else {
-        console.log("INVALID IMAGE TYPE");
+        console.log("INVALID IMAGE TYPE")
       }
     }
-  };
+  }
 
   const handlePredictWithImage = () => {
-    predictUserOneFa(false, undefined, undefined, uploadImage3);
-  };
+    predictUserOneFa(false, undefined, undefined, uploadImage3)
+  }
 
-  const doBackDlScanFromImage = () => { };
+  const doBackDlScanFromImage = () => {}
 
-  const [uploadImage4, setUploadImage4] = useState(null);
-  const handleUploadImage4 = async (e) => {
-    console.log(e.target.files);
-    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/;
+  const [uploadImage4, setUploadImage4] = useState(null)
+  const handleUploadImage4 = async e => {
+    console.log(e.target.files)
+    const imageRegex = /image[/]jpg|image[/]png|image[/]jpeg|image[/]gif/
     if (e.target.files.length > 0) {
       if (imageRegex.test(e.target.files[0].type)) {
-        const imageUrl = URL.createObjectURL(e.target.files[0]);
+        const imageUrl = URL.createObjectURL(e.target.files[0])
 
-        console.log(e.target.files[0]);
+        console.log(e.target.files[0])
 
-        const getBase64 = (file) => {
+        const getBase64 = file => {
           return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
+            var reader = new FileReader()
+            reader.readAsDataURL(file)
 
             reader.onload = function () {
-              resolve(reader.result);
-            };
+              resolve(reader.result)
+            }
             reader.onerror = function (error) {
-              reject(error);
-            };
-          });
-        };
+              reject(error)
+            }
+          })
+        }
 
-        const base64 = await getBase64(e.target.files[0]); // prints the base64 string
-        console.log("====> GIF TEST: ", { base64 });
-        var newImg = new Image();
-        newImg.src = base64;
+        const base64 = await getBase64(e.target.files[0]) // prints the base64 string
+        console.log("====> GIF TEST: ", { base64 })
+        var newImg = new Image()
+        newImg.src = base64
         newImg.onload = async () => {
           var imgSize = {
             w: newImg.width,
             h: newImg.height,
-          };
-          alert(imgSize.w + " " + imgSize.h);
-          const canvas = document.createElement("canvas");
-          canvas.setAttribute("height", `${imgSize.h}`);
-          canvas.setAttribute("width", `${imgSize.w}`);
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(newImg, 0, 0);
+          }
+          alert(imgSize.w + " " + imgSize.h)
+          const canvas = document.createElement("canvas")
+          canvas.setAttribute("height", `${imgSize.h}`)
+          canvas.setAttribute("width", `${imgSize.w}`)
+          var ctx = canvas.getContext("2d")
+          ctx.drawImage(newImg, 0, 0)
 
-          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h);
-          console.log("imageData", imageData);
-          setUploadImage4(imageData);
-        };
+          const imageData = ctx.getImageData(0, 0, imgSize.w, imgSize.h)
+          console.log("imageData", imageData)
+          setUploadImage4(imageData)
+        }
       } else {
-        console.log("INVALID IMAGE TYPE");
+        console.log("INVALID IMAGE TYPE")
       }
     }
-  };
+  }
 
-  const doFrontDlScanFromImage = () => { };
+  const doFrontDlScanFromImage = () => {}
 
   function iOS() {
     return ["iPad Simulator", "iPhone Simulator", "iPod Simulator", "iPad", "iPhone", "iPod"].includes(
-      navigator.platform
-    );
+      navigator.platform,
+    )
   }
 
   const {
@@ -937,20 +930,20 @@ const Ready = () => {
     faceLoginPUID: twoStepFaceLoginPUID,
     faceLoginValidationStatus: twoStepFaceLoginStatus,
     faceLoginAntispoofStatus: twoStepFaceLoginAntispoofStatus,
-  } = useTwoStepFaceLogin(setShowSuccess);
+  } = useTwoStepFaceLogin(setShowSuccess)
 
   const handleTwoStepFaceLogin = async () => {
-    setCurrentAction("twoStepFaceLogin");
-    await doTwoStepFaceLogin();
-  };
+    setCurrentAction("twoStepFaceLogin")
+    await doTwoStepFaceLogin()
+  }
 
   const handleDocumentMugshotFaceCompare = () => {
-    console.log("comparing start!!!");
-    const callback = (result) => {
-      console.log("compare result", result);
-    };
-    documentMugshotFaceCompare(callback, enrollImageData, predictMugshotImageData);
-  };
+    console.log("comparing start!!!")
+    const callback = result => {
+      console.log("compare result", result)
+    }
+    documentMugshotFaceCompare(callback, enrollImageData, predictMugshotImageData)
+  }
 
   const {
     doTwoStepFaceLogin: doTwoStepMultiframeFaceLogin,
@@ -960,12 +953,12 @@ const Ready = () => {
     faceLoginAntispoofStatus: twoStepMultiframeFaceLoginAntispoofStatus,
     faceLoginValidationStatus: twoStepMultiframeFaceLoginValidationStatus,
     faceLoginMessage: twoStepMultiframeFaceLoginMessage,
-  } = useMultiframeTwoStepFaceLogin(setShowSuccess);
+  } = useMultiframeTwoStepFaceLogin(setShowSuccess)
 
   const handleMultiframeTwoStepFaceLogin = () => {
-    setCurrentAction("useMultiframeTwoStepFaceLogin");
-    doTwoStepMultiframeFaceLogin();
-  };
+    setCurrentAction("useMultiframeTwoStepFaceLogin")
+    doTwoStepMultiframeFaceLogin()
+  }
 
   const {
     multiframePredictAntispoofPerformed,
@@ -975,18 +968,18 @@ const Ready = () => {
     multiframePredictPUID,
     multiframePredictUserOneFa,
     multiframePredictValidationStatus,
-  } = useMultiframePredict({ onSuccess: () => { }, disableButtons: setDisableButtons });
+  } = useMultiframePredict({ onSuccess: () => {}, disableButtons: setDisableButtons })
 
   const handleMultiframePredict = async () => {
-    setCurrentAction("useMultiframePredict");
-    multiframePredictUserOneFa({ mf_token: "" });
-  };
+    setCurrentAction("useMultiframePredict")
+    multiframePredictUserOneFa({ mf_token: "" })
+  }
 
-  const threshold_user_too_close_ref = useRef();
-  const threshold_user_too_far_ref = useRef();
-  const threshold_profile_enroll_ref = useRef();
-  const threshold_high_vertical_enroll_ref = useRef();
-  const threshold_down_vertical_enroll_ref = useRef();
+  const threshold_user_too_close_ref = useRef()
+  const threshold_user_too_far_ref = useRef()
+  const threshold_profile_enroll_ref = useRef()
+  const threshold_high_vertical_enroll_ref = useRef()
+  const threshold_down_vertical_enroll_ref = useRef()
 
   return (
     <>
@@ -1010,7 +1003,7 @@ const Ready = () => {
                 type="checkbox"
                 value={debugContext.functionLoop}
                 onChange={() => {
-                  debugContext.setFuctionLoop(!debugContext.functionLoop);
+                  debugContext.setFuctionLoop(!debugContext.functionLoop)
                 }}
               />
               <span className="slider round"></span>
@@ -1048,20 +1041,20 @@ const Ready = () => {
                   <button onClick={handleCloseCamera}> Close Camera</button>
                 </div>
                 <label> Select Camera: </label>
-                <select value={deviceId || device} onChange={(e) => handleSwitchCamera(e)}>
+                <select value={deviceId || device} onChange={e => handleSwitchCamera(e)}>
                   {(devicesList?.length ? devicesList : devices).map((e, index) => {
                     return (
                       <option id={e.value} value={e.value} key={index}>
                         {e.label}
                       </option>
-                    );
+                    )
                   })}
                 </select>
               </div>
               {currentAction === "useScanDocumentFront" || currentAction === "useScanDocumentBack" ? (
                 <div>
                   <label> Canvas Size: </label>
-                  <select defaultValue={initialCanvasSize} value={canvasSize} onChange={(e) => handleCanvasSize(e)}>
+                  <select defaultValue={initialCanvasSize} value={canvasSize} onChange={e => handleCanvasSize(e)}>
                     {canvasSizeList.map(({ label, value }) => (
                       <option id={value} value={value} key={value}>
                         {label}
@@ -1081,9 +1074,9 @@ const Ready = () => {
                   min={cameraFocusMin}
                   max={cameraFocusMax}
                   defaultValue={cameraFocusCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleFocusChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleFocusChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1097,9 +1090,9 @@ const Ready = () => {
                   min={cameraExposureTimeMin}
                   max={cameraExposureTimeMax}
                   defaultValue={cameraExposureTimeCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleExposureTimeChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleExposureTimeChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1113,9 +1106,9 @@ const Ready = () => {
                   min={cameraSharpnessMin}
                   max={cameraSharpnessMax}
                   defaultValue={cameraSharpnessCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleSharpnessChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleSharpnessChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1129,9 +1122,9 @@ const Ready = () => {
                   min={cameraBrightnessMin}
                   max={cameraBrightnessMax}
                   defaultValue={cameraBrightnessCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleBrightnessChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleBrightnessChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1145,9 +1138,9 @@ const Ready = () => {
                   min={cameraSaturationMin}
                   max={cameraSaturationMax}
                   defaultValue={cameraSaturationCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleSaturationChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleSaturationChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1161,9 +1154,9 @@ const Ready = () => {
                   min={cameraContrastMin}
                   max={cameraContrastMax}
                   defaultValue={cameraContrastCurrent}
-                  onChange={async (e) => {
-                    console.log("changed");
-                    await handleContrastChange(e.currentTarget.value);
+                  onChange={async e => {
+                    console.log("changed")
+                    await handleContrastChange(e.currentTarget.value)
                   }}
                 />
               </div>
@@ -1204,10 +1197,10 @@ const Ready = () => {
                 id="userVideo"
                 className={
                   (currentAction === "useScanDocumentFront" ||
-                    currentAction === "useScanDocumentBack" ||
-                    currentAction === "useScanDocumentFrontValidity" ||
-                    currentAction === "useScanHealthcareCard" ||
-                    currentAction === "useScanDocumentFrontOCR"
+                  currentAction === "useScanDocumentBack" ||
+                  currentAction === "useScanDocumentFrontValidity" ||
+                  currentAction === "useScanHealthcareCard" ||
+                  currentAction === "useScanDocumentFrontOCR"
                     ? `cameraDisplay`
                     : `cameraDisplay mirrored`) +
                   " " +
@@ -1241,8 +1234,8 @@ const Ready = () => {
                     type="checkbox"
                     value={skipAntiSpoof}
                     onChange={() => {
-                      setSkipAntispoof(!skipAntiSpoof);
-                      console.log("skip", !skipAntiSpoof);
+                      setSkipAntispoof(!skipAntiSpoof)
+                      console.log("skip", !skipAntiSpoof)
                     }}
                   />
                   <span className="slider round"></span>
@@ -1280,7 +1273,7 @@ const Ready = () => {
                           changeThresholdEnroll({
                             name: "threshold_profile_enroll",
                             newValue: threshold_profile_enroll_ref.current.value,
-                          });
+                          })
                         }}
                       />
                     </div>
@@ -1294,7 +1287,7 @@ const Ready = () => {
                           changeThresholdEnroll({
                             name: "threshold_user_too_far",
                             newValue: threshold_user_too_far_ref.current.value,
-                          });
+                          })
                         }}
                       />
                     </div>
@@ -1305,11 +1298,11 @@ const Ready = () => {
                         defaultValue={0.8}
                         ref={threshold_user_too_close_ref}
                         onChange={() => {
-                          console.log("threshold_user_too_close_ref:", threshold_user_too_close_ref.current.value);
+                          console.log("threshold_user_too_close_ref:", threshold_user_too_close_ref.current.value)
                           changeThresholdEnroll({
                             name: "threshold_user_too_close",
                             newValue: threshold_user_too_close_ref.current.value,
-                          });
+                          })
                         }}
                       />
                     </div>
@@ -1323,7 +1316,7 @@ const Ready = () => {
                           changeThresholdEnroll({
                             name: "threshold_down_vertical_enroll",
                             newValue: threshold_down_vertical_enroll_ref.current.value,
-                          });
+                          })
                         }}
                       />
                     </div>
@@ -1337,7 +1330,7 @@ const Ready = () => {
                           changeThresholdEnroll({
                             name: "threshold_high_vertical_enroll",
                             newValue: threshold_high_vertical_enroll_ref.current.value,
-                          });
+                          })
                         }}
                       />
                     </div>
@@ -1483,10 +1476,12 @@ const Ready = () => {
                   <div>{`Last Name: ${scannedCodeData ? scannedCodeData?.barcode_data?.last_name : ""}`}</div>
                   <div>{`Date of Birth: ${scannedCodeData ? scannedCodeData?.barcode_data?.date_of_birth : ""}`}</div>
                   <div>{`Gender: ${scannedCodeData ? scannedCodeData?.barcode_data?.gender : ""}`}</div>
-                  <div>{`Street Address1: ${scannedCodeData ? scannedCodeData?.barcode_data?.street_address1 : ""
-                    }`}</div>
-                  <div>{`Street Address2: ${scannedCodeData ? scannedCodeData?.barcode_data?.street_address2 : ""
-                    }`}</div>
+                  <div>{`Street Address1: ${
+                    scannedCodeData ? scannedCodeData?.barcode_data?.street_address1 : ""
+                  }`}</div>
+                  <div>{`Street Address2: ${
+                    scannedCodeData ? scannedCodeData?.barcode_data?.street_address2 : ""
+                  }`}</div>
                   <div>{`City: ${scannedCodeData ? scannedCodeData?.barcode_data?.city : ""}`}</div>
                   <div>{`Postal Code: ${scannedCodeData ? scannedCodeData?.barcode_data?.postal_code : ""}`}</div>
                   <div style={{ display: "flex", gap: "5px" }}>
@@ -1494,7 +1489,7 @@ const Ready = () => {
                       <button
                         className="button"
                         onClick={() => {
-                          handleCopyToClipboard(croppedBarcodeBase64);
+                          handleCopyToClipboard(croppedBarcodeBase64)
                         }}
                       >
                         Copy Cropped Barcode Base64
@@ -1504,7 +1499,7 @@ const Ready = () => {
                       <button
                         className="button"
                         onClick={() => {
-                          handleCopyToClipboard(croppedBackDocumentBase64);
+                          handleCopyToClipboard(croppedBackDocumentBase64)
                         }}
                       >
                         Copy Cropped Document Base64
@@ -1522,15 +1517,16 @@ const Ready = () => {
                       frontScanData ? getFrontDocumentStatusMessage(frontScanData.returnValue.op_status) : ""
                     }`}{" "}
                   </div> */}
-                  <div>{`Document 4 corners found: ${isfoundValidity ? "Document 4 corners available" : "not found"
-                    }`}</div>
+                  <div>{`Document 4 corners found: ${
+                    isfoundValidity ? "Document 4 corners available" : "not found"
+                  }`}</div>
                   <div>{`Mugshot found: ${isMugshotFound ? "Mugshot Available" : "not found"}`}</div>
                   {predictMugshotImage && croppedDocumentImage && (
                     <div style={{ display: "flex", gap: "10px", padding: "10px" }}>
                       <button
                         className="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(predictMugshotImage);
+                          navigator.clipboard.writeText(predictMugshotImage)
                         }}
                       >
                         Copy Mugshot Image String
@@ -1538,7 +1534,7 @@ const Ready = () => {
                       <button
                         className="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(croppedDocumentImage);
+                          navigator.clipboard.writeText(croppedDocumentImage)
                         }}
                       >
                         Copy Document Image String
@@ -1586,8 +1582,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 onClick={handleIsValid}
@@ -1601,8 +1597,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1615,8 +1611,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useEnrollOneFa"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1629,8 +1625,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "enrollWithAge"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1644,8 +1640,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "usePredictOneFa"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1658,8 +1654,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useMultiframePredict"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1673,8 +1669,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useFaceLogin"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1705,8 +1701,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useContinuousPredictWithoutRestrictions"
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1720,8 +1716,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1734,8 +1730,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1749,8 +1745,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1763,8 +1759,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1780,8 +1776,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1795,8 +1791,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1809,8 +1805,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1838,13 +1834,13 @@ const Ready = () => {
               <button
                 className="button"
                 onClick={() => {
-                  handlePredictUrl("collection_d");
+                  handlePredictUrl("collection_d")
                 }}
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1854,13 +1850,13 @@ const Ready = () => {
               <button
                 className="button"
                 onClick={() => {
-                  handleEnrollUrl("collection_d");
+                  handleEnrollUrl("collection_d")
                 }}
                 style={
                   disableButtons
                     ? {
-                      backgroundColor: "gray",
-                    }
+                        backgroundColor: "gray",
+                      }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1966,7 +1962,7 @@ const Ready = () => {
         <></>
       )}
     </>
-  );
-};
+  )
+}
 
-export default Ready;
+export default Ready

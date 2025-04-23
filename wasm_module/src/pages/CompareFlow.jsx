@@ -53,7 +53,7 @@
 //   useEffect(() => {
 //     console.log("useEffect starting wasm and camera");
 //     console.log("--- wasm status ", wasmReady, ready);
-//     if (!wasmReady) { 
+//     if (!wasmReady) {
 //       if(!callingWasm){
 //         console.log("init wasm called:");
 //         initWasm();
@@ -74,7 +74,7 @@
 //         console.log("COMPARE RESULT: ", result);
 //         setConfidenceScore(result.returnValue.conf_score);
 //       };
-  
+
 //       console.log("Image Data:", { enrollImageData, predictMugshotImageData });
 //       if (enrollImageData && predictMugshotImageData) {
 //         await faceCompareLocal(callback, enrollImageData, predictMugshotImageData, { input_image_format: "rgba" });

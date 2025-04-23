@@ -1,102 +1,102 @@
-import { useEffect, useState } from "react";
-import { convertCroppedImage, scanFrontDocument as scanFrontDocumentModule } from "@privateid/cryptonets-web-sdk-alpha";
+import { useEffect, useState } from "react"
+import { convertCroppedImage, scanFrontDocument as scanFrontDocumentModule } from "@privateid/cryptonets-web-sdk-alpha"
 
-let loop = true;
-const useScanFrontDocumentOCR = (setShowSuccess) => {
-  const [scanResult, setScanResult] = useState(null);
-  const [scannedIdData, setScannedIdData] = useState(null);
-  const [isFound, setIsFound] = useState(false);
-  const [isMugshotFound, setIsMugshotFound] = useState(null);
-  const [inputImageData, setInputImageData] = useState(null);
-  const [inputImage, setInputImage] = useState(null);
+let loop = true
+const useScanFrontDocumentOCR = setShowSuccess => {
+  const [scanResult, setScanResult] = useState(null)
+  const [scannedIdData, setScannedIdData] = useState(null)
+  const [isFound, setIsFound] = useState(false)
+  const [isMugshotFound, setIsMugshotFound] = useState(null)
+  const [inputImageData, setInputImageData] = useState(null)
+  const [inputImage, setInputImage] = useState(null)
   // Getting mugshot from document scan
-  const [predictMugshotRaw, setPredictMugshotRaw] = useState(null);
-  const [predictMugshotImageData, setPredictMugshotImageData] = useState(null);
-  const [predictMugshotImage, setPredictMugshotImage] = useState(null);
+  const [predictMugshotRaw, setPredictMugshotRaw] = useState(null)
+  const [predictMugshotImageData, setPredictMugshotImageData] = useState(null)
+  const [predictMugshotImage, setPredictMugshotImage] = useState(null)
 
   // Cropped Front Document
-  const [croppedDocumentImageData, setCroppedDocumentImageData] = useState(null);
-  const [croppedDocumentImage, setCroppedDocumentImage] = useState(null);
-  const [returnValue, setResultValue] = useState(null);
+  const [croppedDocumentImageData, setCroppedDocumentImageData] = useState(null)
+  const [croppedDocumentImage, setCroppedDocumentImage] = useState(null)
+  const [returnValue, setResultValue] = useState(null)
 
-  const [frontScanData, setFrontScanData] = useState(null);
-  const [ageOCR, setAge] = useState(null);
+  const [frontScanData, setFrontScanData] = useState(null)
+  const [ageOCR, setAge] = useState(null)
 
-  const documentCallback = (result) => {
-    console.log("Front scan callback result:", result);
-    setFrontScanData(result);
+  const documentCallback = result => {
+    console.log("Front scan callback result:", result)
+    setFrontScanData(result)
     if (result.doc_validation_status === 0 && result.age_from_ocr_text) {
-      console.log(result.age_from_ocr_text, '------result.age_from_ocr_text------')
+      console.log(result.age_from_ocr_text, "------result.age_from_ocr_text------")
       setAge(result.age_from_ocr_text)
-      setIsFound(true);
-      setResultValue(result);
+      setIsFound(true)
+      setResultValue(result)
     } else {
-      scanFrontDocument();
+      scanFrontDocument()
     }
-  };
+  }
 
   const doConvert = async (message, imageData) => {
     try {
       if (imageData.data.length === imageData.width * imageData.height * 4) {
-        const b64Converted = await convertCroppedImage(imageData.data, imageData.width, imageData.height);
-        console.log(`${message}`, b64Converted);
-        return b64Converted;
+        const b64Converted = await convertCroppedImage(imageData.data, imageData.width, imageData.height)
+        console.log(`${message}`, b64Converted)
+        return b64Converted
       }
     } catch (e) {
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
   // Cropped Document
   useEffect(() => {
     if (isFound && croppedDocumentImageData && returnValue) {
-      if (croppedDocumentImageData?.length &&  returnValue?.cropped_document?.width) {
+      if (croppedDocumentImageData?.length && returnValue?.cropped_document?.width) {
         const image = new ImageData(
-            croppedDocumentImageData,
-            returnValue.cropped_document.width,
-            returnValue.cropped_document.height
-        );
-        console.log("cropped document image:", image);
-        setCroppedDocumentImageData(image);
+          croppedDocumentImageData,
+          returnValue.cropped_document.width,
+          returnValue.cropped_document.height,
+        )
+        console.log("cropped document image:", image)
+        setCroppedDocumentImageData(image)
         if (image?.data?.length) {
-          const b64 = doConvert("cropped document image:", image);
+          const b64 = doConvert("cropped document image:", image)
           setCroppedDocumentImage(b64)
         }
       }
     }
-  }, [isFound, croppedDocumentImageData, returnValue]);
+  }, [isFound, croppedDocumentImageData, returnValue])
 
   useEffect(() => {
     if (isFound && predictMugshotRaw && returnValue) {
-      console.log("before converting:", { isFound, predictMugshotRaw, returnValue });
-      console.log("w x h", { w: returnValue?.cropped_mugshot?.width, h: returnValue.cropped_mugshot.height });
+      console.log("before converting:", { isFound, predictMugshotRaw, returnValue })
+      console.log("w x h", { w: returnValue?.cropped_mugshot?.width, h: returnValue.cropped_mugshot.height })
 
       const image = new ImageData(
-          predictMugshotRaw,
-          returnValue.cropped_mugshot.width,
-          returnValue.cropped_mugshot.height
-      );
-      console.log("MugshotImageData", image);
-      setPredictMugshotImageData(image);
-      setIsMugshotFound(true);
+        predictMugshotRaw,
+        returnValue.cropped_mugshot.width,
+        returnValue.cropped_mugshot.height,
+      )
+      console.log("MugshotImageData", image)
+      setPredictMugshotImageData(image)
+      setIsMugshotFound(true)
       if (image?.data?.length) {
-        const b64 = doConvert("cropped mugshot image:", image);
+        const b64 = doConvert("cropped mugshot image:", image)
         setPredictMugshotImage(b64)
       }
     }
-  }, [isFound, predictMugshotRaw, returnValue]);
+  }, [isFound, predictMugshotRaw, returnValue])
 
   // Cropped Document
   useEffect(() => {
     if (isFound && inputImageData) {
       if (inputImage?.data?.lengh) {
-        doConvert(inputImageData);
+        doConvert(inputImageData)
       }
     }
-  }, [isFound, inputImageData]);
+  }, [isFound, inputImageData])
 
   const scanFrontDocument = async (functionLoop = true, uploadData = undefined) => {
-    loop = functionLoop;
+    loop = functionLoop
     const {
       result: resultData,
       croppedDocument,
@@ -106,17 +106,17 @@ const useScanFrontDocumentOCR = (setShowSuccess) => {
       callback: documentCallback,
       image: uploadData,
       config: {
-        calculate_age_from_ocr_text: true
-      }
-    });
+        calculate_age_from_ocr_text: true,
+      },
+    })
 
-    setPredictMugshotRaw(croppedMugshot);
-    setCroppedDocumentImageData(croppedDocument);
-    setInputImageData(imageData);
-    console.log(croppedDocument, croppedMugshot, imageData);
+    setPredictMugshotRaw(croppedMugshot)
+    setCroppedDocumentImageData(croppedDocument)
+    setInputImageData(imageData)
+    console.log(croppedDocument, croppedMugshot, imageData)
 
-    console.log("Validate DL", resultData);
-  };
+    console.log("Validate DL", resultData)
+  }
 
   return {
     scanResult,
@@ -128,8 +128,8 @@ const useScanFrontDocumentOCR = (setShowSuccess) => {
     predictMugshotImage,
     croppedDocumentImage,
     frontScanData,
-    ageOCR
-  };
-};
+    ageOCR,
+  }
+}
 
-export default useScanFrontDocumentOCR;
+export default useScanFrontDocumentOCR

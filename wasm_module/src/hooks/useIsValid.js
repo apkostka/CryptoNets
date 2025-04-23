@@ -1,24 +1,24 @@
-import { useState } from "react";
-import { isValid } from "@privateid/cryptonets-web-sdk-alpha";
+import { useState } from "react"
+import { isValid } from "@privateid/cryptonets-web-sdk-alpha"
 
 const useIsValid = (element = "userVideo", deviceId = null) => {
-  const [antispoofPerformed, setAntispoofPerformed] = useState("");
-  const [antispoofStatus, setAntispoofStatus] = useState("");
-  const [isValidStatus, setIsValidStatus] = useState("");
+  const [antispoofPerformed, setAntispoofPerformed] = useState("")
+  const [antispoofStatus, setAntispoofStatus] = useState("")
+  const [isValidStatus, setIsValidStatus] = useState("")
 
-  const callback = (response) => {
-    console.log("isValid Response:", response);
+  const callback = response => {
+    console.log("isValid Response:", response)
 
     if (response?.call_status === 0) {
-      setAntispoofStatus(response?.antispoof_status);
-      setIsValidStatus(response?.face_validation_status);
+      setAntispoofStatus(response?.antispoof_status)
+      setIsValidStatus(response?.face_validation_status)
     } else {
-      setAntispoofPerformed("");
-      setAntispoofStatus("");
-      setIsValidStatus("");
+      setAntispoofPerformed("")
+      setAntispoofStatus("")
+      setIsValidStatus("")
     }
-    isValidCall();
-  };
+    isValidCall()
+  }
 
   const isValidCall = async (skipAntispoof = true) => {
     // eslint-disable-next-line no-unused-vars
@@ -27,10 +27,10 @@ const useIsValid = (element = "userVideo", deviceId = null) => {
       config: {
         input_image_format: "rgba",
       },
-    });
-  };
+    })
+  }
 
-  return { antispoofPerformed, antispoofStatus, isValidStatus, isValidCall };
-};
+  return { antispoofPerformed, antispoofStatus, isValidStatus, isValidCall }
+}
 
-export default useIsValid;
+export default useIsValid

@@ -52,7 +52,7 @@
 //               result.returnValue.PI.uuid,
 //               result.returnValue.PI.guid
 //             );
-            
+
 //           } else {
 //             const { message }  = result.returnValue;
 //             setContinuousPredictMessage(message);
