@@ -2,8 +2,8 @@ import { useState } from "react"
 import { predictAge } from "@privateid/cryptonets-web-sdk-alpha"
 
 let skipAntispoofGlobal = false
-let multiFrameToken = ""
-const useMultiFramePredictAge = () => {
+let multiframeToken = ""
+const useMultiframePredictAge = () => {
   const [age, setAge] = useState(null)
   const [antispoofPerformed, setAntispoofPerformed] = useState(false)
   const [antispoofStatus, setAntispoofStatus] = useState("")
@@ -37,4 +37,4 @@ const useMultiFramePredictAge = () => {
   return { doPredictAge, age, antispoofPerformed, antispoofStatus, validationStatus }
 }
 
-export default useMultiFramePredictAge
+export default useMultiframePredictAge

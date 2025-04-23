@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 
@@ -24,20 +25,21 @@ import {
   useFaceLogin,
   useScanHealthcareCard,
   useContinuousPredictWithoutRestrictions,
-  useMultiFramePredictAge,
+  useMultiframePredictAge,
   useOscarLogin,
   useEnrollWithAge,
   useTwoStepFaceLogin,
   useMultiframeTwoStepFaceLogin,
-  useMultiframePredict,
-} from "../hooks"
-import { DebugContext } from "../context/DebugContext"
+  useMultiframePredict
+} from "../hooks";
+
 import {
   canvasSizeOptions,
   isBackCamera,
   setMax2KForMobile,
   WIDTH_TO_STANDARDS
 } from "../utils"
+import { DebugContext } from "../context/DebugContext"
 
 import "./styles.css"
 
@@ -392,7 +394,7 @@ const Ready = () => {
     antispoofPerformed: predictAgeAntispoofPerformed,
     antispoofStatus: predictAgeAntispoofStatus,
     validationStatus: predictAgeValidationStatus,
-  } = useMultiFramePredictAge()
+  } = useMultiframePredictAge()
 
   const handlePredictAge = async () => {
     setShowSuccess(false)

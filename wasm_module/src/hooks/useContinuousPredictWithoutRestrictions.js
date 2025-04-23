@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { continuousPredictWithoutRestrictions } from "@privateid/cryptonets-web-sdk-alpha"
-let loop = true
+
 const useContinuousPredictWithoutRestrictions = setShowSuccess => {
   const [continuousPredictWithoutRestrictionsMessage, setContinuousPredictWithoutRestrictionsMessage] = useState("")
 
@@ -24,7 +24,7 @@ const useContinuousPredictWithoutRestrictions = setShowSuccess => {
           setContinuousPredictWithoutRestrictionsPUID(result.returnValue.puid)
         }
         if (result.returnValue?.status !== 0) {
-          const { status, message } = result.returnValue
+          const { message } = result.returnValue
           setContinuousPredictWithoutRestrictionsMessage(message)
           setShowSuccess(false)
           setContinuousPredictWithoutRestrictionsValidationStatus(result.returnValue.status)
