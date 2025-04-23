@@ -41,16 +41,19 @@ import {
 } from "../utils"
 import { DebugContext } from "../context/DebugContext"
 
+// TODO: why are these separate from index.css?
 import "./styles.css"
 
 let callingWasm = false
 
 const Ready = () => {
-  const debugContext = useContext(DebugContext)
+  // TODO: what does this do? Used to create `parseBool` var in useWasm, which is unused
   let { loadSimd } = useParams()
   console.log(loadSimd)
+
   const { ready: wasmReady, deviceSupported, init: initWasm } = useWasm()
 
+  /* INIT CAMERA */
   const [cameraSettingsList, setCameraSettingsList] = useState({
     focusDistance: false,
     exposureTime: false,
@@ -116,7 +119,8 @@ const Ready = () => {
     setCameraSettingsList,
   )
 
-  const [disableButtons, setDisableButtons] = useState(false)
+  // Get debug config from URL
+  const debugContext = useContext(DebugContext)
 
   function getUrlParameter(sParam, defaultValue = undefined) {
     const sPageURL = window.location.search.substring(1)
@@ -140,6 +144,7 @@ const Ready = () => {
     }
   }, [])
 
+  const [disableButtons, setDisableButtons] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
   const [deviceCapabilities, setDeviceCapabilities] = useState(capabilities)
@@ -162,6 +167,7 @@ const Ready = () => {
   const [canvasSize, setCanvasSize] = useState()
 
   // Use Continuous Predict
+  // TODO: looks like this was disabled at some point?
   const predictRetryTimes = 1
   const [continuousPredictUUID, setContinuousPredictUUID] = useState(null)
   const [continuousPredictGUID, setContinuousPredictGUID] = useState(null)
@@ -186,6 +192,7 @@ const Ready = () => {
     if (!wasmReady) {
       if (!callingWasm) {
         // NOTE: MAKE SURE THAT WASM IS ONLY LOADED ONCE
+        // TODO: can this be memoized?
         initWasm(loadSimd)
         callingWasm = true
       }
