@@ -1,13 +1,14 @@
-/* eslint-disable */
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useParams } from "react-router-dom"
+
 import {
   switchCamera,
-  setStopLoopContinuousAuthentication,
   closeCamera,
-  faceCompareLocal,
   documentMugshotFaceCompare,
 } from "@privateid/cryptonets-web-sdk-alpha"
-import platform, { os } from "platform"
+import {
+  getRawFaceValidationStatus,
+} from "@privateid/cryptonets-web-sdk-alpha/dist/utils"
 
 import {
   useCamera,
@@ -16,35 +17,32 @@ import {
   useIsValid,
   useEnroll,
   usePredict,
-  useScanFrontDocument,
   useScanBackDocument,
+  useScanFrontDocumentWithoutPredict,
+  useScanFrontDocumentOCR,
+  usePrividFaceISO,
+  useFaceLogin,
+  useScanHealthcareCard,
+  useContinuousPredictWithoutRestrictions,
+  useMultiFramePredictAge,
+  useOscarLogin,
+  useEnrollWithAge,
+  useTwoStepFaceLogin,
+  useMultiframeTwoStepFaceLogin,
+  useMultiframePredict,
 } from "../hooks"
-import { CANVAS_SIZE, canvasSizeOptions, isBackCamera, isMobile, setMax2KForMobile, WIDTH_TO_STANDARDS } from "../utils"
+import { DebugContext } from "../context/DebugContext"
+import {
+  canvasSizeOptions,
+  isBackCamera,
+  setMax2KForMobile,
+  WIDTH_TO_STANDARDS
+} from "../utils"
 
 import "./styles.css"
-import usePredictAge from "../hooks/usePredictAge"
-import useScanFrontDocumentWithoutPredict from "../hooks/useScanFrontDocument"
-import useScanFrontDocumentOCR from "../hooks/useScanFrontDocumentOCR"
-import usePrividFaceISO from "../hooks/usePrividFaceISO"
-import useFaceLogin from "../hooks/useFaceLogin"
-import useScanHealthcareCard from "../hooks/useScanHealthcareCard"
-import {
-  getEnrollFaceMessage,
-  getFaceValidationMessage,
-  getFrontDocumentStatusMessage,
-  getRawFaceValidationStatus,
-} from "@privateid/cryptonets-web-sdk-alpha/dist/utils"
-import { DebugContext } from "../context/DebugContext"
-import useContinuousPredictWithoutRestrictions from "../hooks/useContinuousPredictWithoutRestriction"
-import useMultiFramePredictAge from "../hooks/useMultiFramePredictAge"
-import useOscarLogin from "../hooks/useOscarLogin"
-import { useParams } from "react-router-dom"
-import useEnrollWithAge from "../hooks/useEnrollWithAge"
-import useTwoStepFaceLogin from "../hooks/useTwoStepFaceLogin"
-import useMultiframeTwoStepFaceLogin from "../hooks/useMultiframeTwoStepFaceLogin"
-import useMultiframePredict from "../hooks/useMultiframePredict"
 
 let callingWasm = false
+
 const Ready = () => {
   const debugContext = useContext(DebugContext)
   let { loadSimd } = useParams()
@@ -603,7 +601,7 @@ const Ready = () => {
     faceLoginMessage,
     faceLoginPUID,
     faceLoginValidationStatus,
-  } = useFaceLogin("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
+  } = useFaceLogin("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleFaceLogin = async () => {
     setShowSuccess(false)
@@ -620,7 +618,7 @@ const Ready = () => {
     oscarLoginMessage,
     oscarLoginPUID,
     oscarLoginValidationStatus,
-  } = useOscarLogin("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
+  } = useOscarLogin("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleOscarLogin = async () => {
     setShowSuccess(false)
@@ -802,7 +800,7 @@ const Ready = () => {
     ewaToken,
     ewaValidationStatus,
     enrollWithAge,
-  } = useEnrollWithAge("userVideo", () => {}, null, deviceId, setShowSuccess, setDisableButtons)
+  } = useEnrollWithAge("userVideo", () => { }, null, deviceId, setShowSuccess, setDisableButtons)
 
   const handleEnrollWithAge = async () => {
     setCurrentAction("enrollWithAge")
@@ -863,7 +861,7 @@ const Ready = () => {
     predictUserOneFa(false, undefined, undefined, uploadImage3)
   }
 
-  const doBackDlScanFromImage = () => {}
+  const doBackDlScanFromImage = () => { }
 
   const [uploadImage4, setUploadImage4] = useState(null)
   const handleUploadImage4 = async e => {
@@ -915,7 +913,7 @@ const Ready = () => {
     }
   }
 
-  const doFrontDlScanFromImage = () => {}
+  const doFrontDlScanFromImage = () => { }
 
   function iOS() {
     return ["iPad Simulator", "iPhone Simulator", "iPod Simulator", "iPad", "iPhone", "iPod"].includes(
@@ -968,7 +966,7 @@ const Ready = () => {
     multiframePredictPUID,
     multiframePredictUserOneFa,
     multiframePredictValidationStatus,
-  } = useMultiframePredict({ onSuccess: () => {}, disableButtons: setDisableButtons })
+  } = useMultiframePredict({ onSuccess: () => { }, disableButtons: setDisableButtons })
 
   const handleMultiframePredict = async () => {
     setCurrentAction("useMultiframePredict")
@@ -1197,10 +1195,10 @@ const Ready = () => {
                 id="userVideo"
                 className={
                   (currentAction === "useScanDocumentFront" ||
-                  currentAction === "useScanDocumentBack" ||
-                  currentAction === "useScanDocumentFrontValidity" ||
-                  currentAction === "useScanHealthcareCard" ||
-                  currentAction === "useScanDocumentFrontOCR"
+                    currentAction === "useScanDocumentBack" ||
+                    currentAction === "useScanDocumentFrontValidity" ||
+                    currentAction === "useScanHealthcareCard" ||
+                    currentAction === "useScanDocumentFrontOCR"
                     ? `cameraDisplay`
                     : `cameraDisplay mirrored`) +
                   " " +
@@ -1476,12 +1474,10 @@ const Ready = () => {
                   <div>{`Last Name: ${scannedCodeData ? scannedCodeData?.barcode_data?.last_name : ""}`}</div>
                   <div>{`Date of Birth: ${scannedCodeData ? scannedCodeData?.barcode_data?.date_of_birth : ""}`}</div>
                   <div>{`Gender: ${scannedCodeData ? scannedCodeData?.barcode_data?.gender : ""}`}</div>
-                  <div>{`Street Address1: ${
-                    scannedCodeData ? scannedCodeData?.barcode_data?.street_address1 : ""
-                  }`}</div>
-                  <div>{`Street Address2: ${
-                    scannedCodeData ? scannedCodeData?.barcode_data?.street_address2 : ""
-                  }`}</div>
+                  <div>{`Street Address1: ${scannedCodeData ? scannedCodeData?.barcode_data?.street_address1 : ""
+                    }`}</div>
+                  <div>{`Street Address2: ${scannedCodeData ? scannedCodeData?.barcode_data?.street_address2 : ""
+                    }`}</div>
                   <div>{`City: ${scannedCodeData ? scannedCodeData?.barcode_data?.city : ""}`}</div>
                   <div>{`Postal Code: ${scannedCodeData ? scannedCodeData?.barcode_data?.postal_code : ""}`}</div>
                   <div style={{ display: "flex", gap: "5px" }}>
@@ -1517,9 +1513,8 @@ const Ready = () => {
                       frontScanData ? getFrontDocumentStatusMessage(frontScanData.returnValue.op_status) : ""
                     }`}{" "}
                   </div> */}
-                  <div>{`Document 4 corners found: ${
-                    isfoundValidity ? "Document 4 corners available" : "not found"
-                  }`}</div>
+                  <div>{`Document 4 corners found: ${isfoundValidity ? "Document 4 corners available" : "not found"
+                    }`}</div>
                   <div>{`Mugshot found: ${isMugshotFound ? "Mugshot Available" : "not found"}`}</div>
                   {predictMugshotImage && croppedDocumentImage && (
                     <div style={{ display: "flex", gap: "10px", padding: "10px" }}>
@@ -1582,8 +1577,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 onClick={handleIsValid}
@@ -1597,8 +1592,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1611,8 +1606,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useEnrollOneFa"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1625,8 +1620,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "enrollWithAge"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1640,8 +1635,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "usePredictOneFa"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1654,8 +1649,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useMultiframePredict"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1669,8 +1664,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useFaceLogin"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1701,8 +1696,8 @@ const Ready = () => {
                 style={
                   disableButtons && currentAction !== "useContinuousPredictWithoutRestrictions"
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1716,8 +1711,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1730,8 +1725,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1745,8 +1740,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1759,8 +1754,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1776,8 +1771,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1791,8 +1786,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1805,8 +1800,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1839,8 +1834,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
@@ -1855,8 +1850,8 @@ const Ready = () => {
                 style={
                   disableButtons
                     ? {
-                        backgroundColor: "gray",
-                      }
+                      backgroundColor: "gray",
+                    }
                     : {}
                 }
                 disabled={disableButtons}
