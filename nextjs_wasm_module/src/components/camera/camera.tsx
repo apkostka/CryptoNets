@@ -28,8 +28,8 @@ export const Camera = () => {
             } = await openCamera({
                 videoElementId: 'userVideo',
                 canvasResolution: {
-                    width: 600,
-                    height: 600
+                    width: 400,
+                    height: 400
                 }
             });
             console.log(devices);
@@ -48,15 +48,21 @@ export const Camera = () => {
     console.log(statuses, errors);
 
     return (
-        <>
-            <p>Face Validation: {`${faceValidationStatus}`}</p>
-            <button
-                onClick={() => {
-                    dispatch(getIsValid());
-                }}>
-                Validate
-            </button>
-            <video id='userVideo' muted autoPlay playsInline></video>
-        </>
+        <form>
+            <div className='mb-3'>
+                <p>Face Validation: {`${faceValidationStatus}`}</p>
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        dispatch(getIsValid());
+                    }}
+                    className='ml-3 cursor-pointer rounded border'>
+                    Validate
+                </button>
+            </div>
+            <div>
+                <video id='userVideo' muted autoPlay className=''></video>
+            </div>
+        </form>
     );
 };

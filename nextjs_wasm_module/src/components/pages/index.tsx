@@ -22,7 +22,7 @@ export const Index = () => {
     const errors: CustomError[] = initError ? [initError] : [];
 
     return (
-        <div>
+        <div className='prose grid grid-cols-1 gap-6'>
             {anyStatusResolvedTo(statuses, RequestStatus.LOADING) && <p>Loading posts ...</p>}
             {anyStatusResolvedTo(statuses, RequestStatus.FAILED) && (
                 <>

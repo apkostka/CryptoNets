@@ -4,6 +4,7 @@ import { RequestStatus } from '@/types/request-status';
 import { FaceValidationStatusCodes, apiUrlProps } from '@/types/wasm';
 import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
 
+// WASM loadPrivIdModule
 export type WasmInitDto = {
     api_url: apiUrlProps;
     api_key?: string;
@@ -18,6 +19,7 @@ export type WasmInitResponse = {
     message?: string;
 };
 
+// WASM isValid
 export type WasmIsValidDto = {
     callback: (result: any) => void;
     config?: {
@@ -34,7 +36,6 @@ export type WasmIsValidResponse = {
 
 export interface WasmOutput {
     init(dto: WasmInitDto): Promise<WasmInitResponse>;
-
     isValidWasmApi(dto: WasmIsValidDto): Promise<WasmIsValidResponse>;
 }
 
@@ -70,7 +71,6 @@ export const wasmReducers = {
             ? FaceValidationStatusCodes[payload.face_validation_status]
             : undefined;
         state.isValidStatus = RequestStatus.COMPLETED;
-        console.log('IS_VALID STATE', state, payload);
     }
 };
 
@@ -126,11 +126,9 @@ export const initWasm =
 export const getIsValid =
     () =>
     async (dispatch: any, _: any, { wasmOutput }: { wasmOutput: WasmOutput }) => {
-        console.log('isValid');
         dispatch(actions.startCall({ callType: WasmCallTypes.IS_VALID }));
         await wasmOutput.isValidWasmApi({
             callback: (result: any) => {
-                console.log('isValid result', result);
                 dispatch(actions.isValid(result));
             },
             config: {
