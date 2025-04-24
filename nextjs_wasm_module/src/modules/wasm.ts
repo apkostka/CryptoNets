@@ -67,10 +67,11 @@ export const wasmReducers = {
         state.initStatus = RequestStatus.COMPLETED;
     },
     isValid: (state: WasmState, { payload }: PayloadAction<WasmIsValidResponse>) => {
-        state.faceValidationStatus = payload.face_validation_status
+        state.faceValidationStatus = payload.face_validation_status !== undefined
             ? FaceValidationStatusCodes[payload.face_validation_status]
             : undefined;
         state.isValidStatus = RequestStatus.COMPLETED;
+        console.log("isVald response: ", payload);
     }
 };
 
@@ -109,33 +110,34 @@ export const createApiUrlConfig = (apiUrl: string): apiUrlProps => {
 const { actions } = wasmSlice;
 export const initWasm =
     () =>
-    async (dispatch: any, _: any, { wasmOutput }: { wasmOutput: WasmOutput }) => {
-        dispatch(actions.startCall({ callType: WasmCallTypes.INIT }));
+        async (dispatch: any, _: any, { wasmOutput }: { wasmOutput: WasmOutput }) => {
+            dispatch(actions.startCall({ callType: WasmCallTypes.INIT }));
 
-        const apiKey = process.env.NEXT_PUBLIC_PRIVATEID_API_KEY;
-        const apiUrl = process.env.NEXT_PUBLIC_PRIVATEID_API_URL || 'https://api.prodv3.cryptonets.ai';
+            const apiKey = process.env.NEXT_PUBLIC_PRIVATEID_API_KEY;
+            const apiUrl = process.env.NEXT_PUBLIC_PRIVATEID_API_URL || 'https://api.prodv3.cryptonets.ai';
 
-        const { support, message } = await wasmOutput.init({
-            api_url: createApiUrlConfig(apiUrl),
-            api_key: apiKey
-        });
+            const { support, message } = await wasmOutput.init({
+                api_url: createApiUrlConfig(apiUrl),
+                api_key: apiKey
+            });
 
-        dispatch(actions.init({ support, message }));
-    };
+            dispatch(actions.init({ support, message }));
+        };
 
 export const getIsValid =
     () =>
-    async (dispatch: any, _: any, { wasmOutput }: { wasmOutput: WasmOutput }) => {
-        dispatch(actions.startCall({ callType: WasmCallTypes.IS_VALID }));
-        await wasmOutput.isValidWasmApi({
-            callback: (result: any) => {
-                dispatch(actions.isValid(result));
-            },
-            config: {
-                input_image_format: 'rgba'
-            }
-        });
-    };
+        async (dispatch: any, _: any, { wasmOutput }: { wasmOutput: WasmOutput }) => {
+            dispatch(actions.startCall({ callType: WasmCallTypes.IS_VALID }));
+            await wasmOutput.isValidWasmApi({
+                callback: (result: any) => {
+                    console.log("isValid result", result);
+                    dispatch(actions.isValid(result));
+                },
+                config: {
+                    input_image_format: 'rgba'
+                }
+            });
+        };
 
 export class WasmApi implements WasmOutput {
     async init(dto: WasmInitDto): Promise<{ support: boolean; message?: string }> {

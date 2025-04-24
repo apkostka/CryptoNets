@@ -53,5 +53,5 @@ export const FaceValidationStatusCodes: any = {
     '20': 'Eyes closed',
     '21': 'Mouth open',
     '22': 'Face tilted right',
-    '23': 'Face tilted left'
+    '23': 'Face tilted left',
 };
