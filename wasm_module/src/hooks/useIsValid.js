@@ -22,7 +22,7 @@ const useIsValid = (element = "userVideo", deviceId = null) => {
 
   const isValidCall = async (skipAntispoof = true) => {
     // eslint-disable-next-line no-unused-vars
-    await isValid({
+    const res = await isValid({
       callback,
       config: {
         input_image_format: "rgba",
